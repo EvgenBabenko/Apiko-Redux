@@ -102,13 +102,38 @@ const divideVotes = votes => {
 
 const divideByAnswerId = (votes, answerId) => divideVotes(votesByAnswerId(votes, answerId));
 
+const compare = (answers, votes, byField) => answers.sort((a, b) => {
+  const { positive: positiveA, negative: negativeA } = divideByAnswerId(votes, a._id);
+  const { positive: positiveB, negative: negativeB } = divideByAnswerId(votes, b._id);
+  
+  if (byField === 'best') {
+    return positiveA < positiveB;
+  }
+  if (byField === 'worst') {
+    return negativeA < negativeB;
+  }
+});
+
+const filteredAnswers = (filter, answers, votes) => {
+  switch (filter) {
+    case 'createdAt':
+      return answers.sort((a, b) => a.createdAt < b.createdAt);
+      break;
+    case 'best':
+      return compare(answers, votes, 'best');
+    case 'worst':
+      return compare(answers, votes, 'worst');
+    default:
+      return answers;
+  }
+}
 
 const getAuthor = (users, authorId) => users.find(user => user._id === authorId)
   || { profile: { fullName: 'Anonymous' } };
 
-const AnswersList = ({ answers, votes, users, onVote, user }) => (
+const AnswersList = ({ answers, votes, users, onVote, user, sortBy }) => (
   <Answers>
-    {answers.map(answer => {
+    {filteredAnswers(sortBy, answers, votes).map(answer => {
       const { positive, negative } = divideByAnswerId(votes, answer._id);
       const author = getAuthor(users, answer.createdById);
       return (

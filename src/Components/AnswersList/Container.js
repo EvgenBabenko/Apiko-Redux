@@ -8,6 +8,7 @@ import Component from './Component';
 
 const mapStateToProps = state => ({
   user: state.user,
+  sortBy: state.answerSort
 });
 
 const enhance = compose(
