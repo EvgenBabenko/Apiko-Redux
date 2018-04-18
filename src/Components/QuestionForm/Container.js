@@ -25,6 +25,7 @@ const prepareTags = R.compose(
 const mapStateToProps = (state) => ({
   user: state.user,
   // TODO: HOMEWORK 9: pick loader from here and display in UI when the post is creating
+  isFetching: state.loader.CREATE_QUESTION
 });
 
 const enhance = compose(
@@ -80,6 +81,7 @@ const enhance = compose(
         history.push('/');
       } else {
         // TODO: HOMEWORK 9: make it work, dispatch loaderActions.createQuestion with db, document and history as arguments
+        dispatch(loaderActions.createQuestion(db, document, history));
       }
     },
     onRemove: ({ match, history }) => () => {
