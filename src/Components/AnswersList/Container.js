@@ -1,4 +1,4 @@
-import { compose, withStateHandlers, withHandlers, lifecycle, branch, renderComponent } from 'recompose';
+import { compose, withStateHandlers, withHandlers, lifecycle, branch, renderComponent, withProps } from 'recompose';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { db } from '../../utils';
@@ -10,6 +10,24 @@ const mapStateToProps = state => ({
   user: state.user,
   sortBy: state.answerSort
 });
+
+const compare = (answers, votes, byField) =>
+  answers.sort((a, b) => {
+    if (byField === 'createdAt') {
+      return a.createdAt < b.createdAt;
+    } else {
+      return countVote(b, votes, byField) - countVote(a, votes, byField);
+    }
+  });
+
+const isPositiveVote = byField => byField === 'best' ? true : false;
+
+const countVote = (answer, votes, byField) => 
+  votes.reduce((res, vote) => {
+    return answer._id === vote.answerId && isPositiveVote(byField) === vote.isPositive ? res + 1 : res;
+  }, 0)
+
+const prepareAnswers = ({ sortBy, answers, votes }) => compare(answers, votes, sortBy);
 
 const enhance = compose(
   connect(mapStateToProps),
@@ -56,6 +74,8 @@ const enhance = compose(
       }
     }
   }),
+
+  withProps(props => ({ answers: prepareAnswers(props) })),
 );
 
 
